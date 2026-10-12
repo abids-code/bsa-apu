@@ -92,6 +92,21 @@ npm test
 npm run lint
 ```
 
+## Deploy to Vercel
+
+This is a TanStack Start server-rendered application. Vercel deploys it through the Nitro
+integration; it does not require a manually created `index.html` file.
+
+1. Import the GitHub repository into Vercel.
+2. Confirm that the framework preset is **TanStack Start**.
+3. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel project environment
+   variables for the Production and Preview environments when Supabase is enabled.
+4. Deploy the project. Vercel runs `npm run build` and serves the generated server entry and
+   static assets.
+
+If Vercel does not detect the framework automatically, the repository includes a `vercel.json`
+that declares the TanStack Start framework preset.
+
 ## Available scripts
 
 ```bash
