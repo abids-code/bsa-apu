@@ -29,6 +29,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/lib/supabase";
+import { uploadOptimizedImage } from "@/lib/storage";
 
 type Album = { id: string; title: string; description: string; published: boolean };
 type Photo = {
@@ -49,6 +50,7 @@ export function AdminGallery() {
   const [albumDialogOpen, setAlbumDialogOpen] = useState(false);
   const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
+  const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
   const [selectedAlbumId, setSelectedAlbumId] = useState("");
 
   const fetchGallery = useCallback(async () => {
@@ -141,7 +143,7 @@ export function AdminGallery() {
     }
     const data = new FormData(event.currentTarget);
     const photo = data.get("photo");
-    if (!(photo instanceof File) || photo.size === 0) {
+    if (!editingPhoto && (!(photo instanceof File) || photo.size === 0)) {
       setErrorMessage("Choose an image to upload.");
       return;
     }
@@ -151,36 +153,58 @@ export function AdminGallery() {
     }
     setSubmitting(true);
     setErrorMessage(null);
-    const fileName = photo.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-    const storagePath = `gallery/${crypto.randomUUID()}-${fileName}`;
-    const { error: uploadError } = await supabase.storage
-      .from("bsa-gallery")
-      .upload(storagePath, photo, {
-        contentType: photo.type,
-        upsert: false,
-      });
-    if (uploadError) {
-      setErrorMessage(uploadError.message);
-      setSubmitting(false);
-      return;
-    }
-    const imageUrl = supabase.storage.from("bsa-gallery").getPublicUrl(storagePath).data.publicUrl;
-    const { error: insertError } = await supabase.from("gallery_items").insert({
-      image_url: imageUrl,
+    const values = {
       caption: String(data.get("caption") ?? "").trim(),
       alt_text: String(data.get("alt_text") ?? "").trim(),
       album_id: selectedAlbumId,
-      published: true,
-    });
-    if (insertError) {
-      await supabase.storage.from("bsa-gallery").remove([storagePath]);
-      setErrorMessage(insertError.message);
+    };
+    let imageUrl = editingPhoto?.image_url;
+    if (photo instanceof File && photo.size > 0) {
+      try {
+        imageUrl = await uploadOptimizedImage(photo, "bsa-gallery", "gallery");
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Could not upload image.");
+        setSubmitting(false);
+        return;
+      }
+    }
+    if (!imageUrl) {
+      setErrorMessage("Choose an image to upload.");
     } else {
-      await fetchGallery();
-      setPhotoDialogOpen(false);
-      setSelectedAlbumId("");
+      const result = editingPhoto
+        ? await supabase
+            .from("gallery_items")
+            .update({ ...values, image_url: imageUrl })
+            .eq("id", editingPhoto.id)
+        : await supabase.from("gallery_items").insert({
+            ...values,
+            image_url: imageUrl,
+            published: true,
+          });
+      if (result.error) {
+        setErrorMessage(result.error.message);
+      } else {
+        await fetchGallery();
+        setPhotoDialogOpen(false);
+        setEditingPhoto(null);
+        setSelectedAlbumId("");
+      }
     }
     setSubmitting(false);
+  }
+
+  function openPhotoCreate() {
+    setEditingPhoto(null);
+    setSelectedAlbumId("");
+    setPhotoDialogOpen(true);
+    setErrorMessage(null);
+  }
+
+  function openPhotoEdit(photo: Photo) {
+    setEditingPhoto(photo);
+    setSelectedAlbumId(photo.album_id ?? "");
+    setPhotoDialogOpen(true);
+    setErrorMessage(null);
   }
 
   async function handleDeletePhoto(photoId: string) {
@@ -315,28 +339,34 @@ export function AdminGallery() {
           </TabsContent>
           <TabsContent value="photos" className="space-y-4">
             <div className="flex justify-end">
-              <Button
-                type="button"
-                onClick={() => {
-                  setPhotoDialogOpen(true);
-                  setErrorMessage(null);
-                }}
-              >
+              <Button type="button" onClick={openPhotoCreate}>
                 Upload Photo
               </Button>
             </div>
             <Dialog open={photoDialogOpen} onOpenChange={setPhotoDialogOpen}>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Upload Photo</DialogTitle>
-                  <DialogDescription>Add a photo to an album.</DialogDescription>
+                  <DialogTitle>{editingPhoto ? "Edit Photo" : "Upload Photo"}</DialogTitle>
+                  <DialogDescription>
+                    {editingPhoto ? "Update this photo's details." : "Add a photo to an album."}
+                  </DialogDescription>
                 </DialogHeader>
-                <form className="space-y-4" onSubmit={handlePhotoUpload}>
+                <form
+                  key={editingPhoto?.id ?? "new-photo"}
+                  className="space-y-4"
+                  onSubmit={handlePhotoUpload}
+                >
                   <div className="space-y-2">
                     <label htmlFor="gallery-photo" className="text-sm font-medium">
                       Image
                     </label>
-                    <Input id="gallery-photo" name="photo" type="file" accept="image/*" required />
+                    <Input
+                      id="gallery-photo"
+                      name="photo"
+                      type="file"
+                      accept="image/*"
+                      required={!editingPhoto}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="gallery-album" className="text-sm font-medium">
@@ -359,17 +389,29 @@ export function AdminGallery() {
                     <label htmlFor="gallery-caption" className="text-sm font-medium">
                       Caption
                     </label>
-                    <Input id="gallery-caption" name="caption" required maxLength={240} />
+                    <Input
+                      id="gallery-caption"
+                      name="caption"
+                      defaultValue={editingPhoto?.caption ?? ""}
+                      required
+                      maxLength={240}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="gallery-alt-text" className="text-sm font-medium">
                       Alt text
                     </label>
-                    <Input id="gallery-alt-text" name="alt_text" required maxLength={500} />
+                    <Input
+                      id="gallery-alt-text"
+                      name="alt_text"
+                      defaultValue={editingPhoto?.alt_text ?? ""}
+                      required
+                      maxLength={500}
+                    />
                   </div>
                   <DialogFooter>
                     <Button type="submit" disabled={submitting}>
-                      {submitting ? "Uploading..." : "Upload Photo"}
+                      {submitting ? "Saving..." : editingPhoto ? "Save Photo" : "Upload Photo"}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -402,18 +444,30 @@ export function AdminGallery() {
                       <TableCell className="font-medium">{photo.caption}</TableCell>
                       <TableCell className="text-muted-foreground">{photo.alt_text}</TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => void handleDeletePhoto(photo.id)}
-                          disabled={deletingId === photo.id}
-                          aria-label={`Delete ${photo.caption}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openPhotoEdit(photo)}
+                            aria-label={`Edit ${photo.caption}`}
+                          >
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => void handleDeletePhoto(photo.id)}
+                            disabled={deletingId === photo.id}
+                            aria-label={`Delete ${photo.caption}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

@@ -49,7 +49,7 @@ function Header() {
           ))}
         </nav>
         <Link
-          to="/contact"
+          to="/join"
           className="hidden rounded-sm bg-primary px-4 py-2 text-sm font-semibold uppercase tracking-wider text-primary-foreground md:inline-block"
         >
           Join us
@@ -113,7 +113,7 @@ function Footer() {
         <FooterColumn title="Get involved">
           <Link to="/events">Events</Link>
           <Link to="/news">News</Link>
-          <Link to="/contact">Volunteer</Link>
+          <Link to="/join">Join BSA</Link>
           <Link to="/contact">Contact us</Link>
         </FooterColumn>
         <FooterColumn title="Visit APU">
@@ -122,7 +122,7 @@ function Footer() {
           </a>
           <p className="text-ink-foreground/60">1-1 Jumonjibaru, Beppu, Oita 874-8577</p>
           <Link
-            to="/contact"
+            to="/join"
             className="mt-3 inline-flex w-fit rounded-sm bg-primary px-4 py-2 font-semibold text-primary-foreground hover:bg-primary/90"
           >
             Become a member

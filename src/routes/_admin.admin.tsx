@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminEvents } from "@/components/admin/AdminEvents";
 import { AdminGallery } from "@/components/admin/AdminGallery";
 import { AdminMessages } from "@/components/admin/AdminMessages";
+import { AdminMembers } from "@/components/admin/AdminMembers";
 import { AdminNews } from "@/components/admin/AdminNews";
 import { useAuth } from "@/lib/use-auth";
 import { supabase } from "@/lib/supabase";
@@ -63,11 +64,12 @@ function Admin() {
             </p>
           )}
           <Tabs defaultValue="events" className="space-y-4">
-            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4">
+            <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-5">
               <TabsTrigger value="events">Events</TabsTrigger>
               <TabsTrigger value="news">News</TabsTrigger>
               <TabsTrigger value="gallery">Gallery</TabsTrigger>
               <TabsTrigger value="messages">Messages</TabsTrigger>
+              <TabsTrigger value="members">Member Requests</TabsTrigger>
             </TabsList>
             <TabsContent value="events">
               <Card>
@@ -76,6 +78,16 @@ function Admin() {
                 </CardHeader>
                 <CardContent>
                   <AdminEvents />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="members">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Member Requests</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <AdminMembers />
                 </CardContent>
               </Card>
             </TabsContent>

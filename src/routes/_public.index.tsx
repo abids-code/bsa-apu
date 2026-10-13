@@ -10,6 +10,8 @@ import community from "@/assets/community.jpg";
 import hero from "@/assets/hero.jpg";
 import nobinboronCover from "@/assets/nobinboron/images/nobinboron-26-spring.jpg";
 import { ComponentShowcase } from "@/components/public/ComponentShowcase";
+import { CoreMembers } from "@/components/public/CoreMembers";
+import { MembersGrid } from "@/components/public/MembersGrid";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,7 +64,7 @@ export const Route = createFileRoute("/_public/")({
         .limit(6),
       supabase
         .from("committee_members")
-        .select("id, name, role, instagram_handle, image_url")
+        .select("id, name, role, instagram_handle, linkedin_url, image_url")
         .order("created_at", { ascending: true }),
     ]);
 
@@ -181,7 +183,7 @@ function Index() {
             </motion.p>
             <motion.div variants={reveal} className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/contact">
+                <Link to="/join">
                   Become a member <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -343,16 +345,19 @@ function Index() {
           variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
         >
           {(albums.length
-            ? albums.map((album) => {
-                const photo = photos.find((item) => item.album_id === album.id);
-                return {
-                  id: album.id,
-                  title: album.title,
-                  description: album.description || "Community moments coming soon.",
-                  image: photo?.image_url,
-                  alt: photo?.alt_text ?? album.title,
-                };
-              })
+            ? [
+                ...albums.map((album) => {
+                  const photo = photos.find((item) => item.album_id === album.id);
+                  return {
+                    id: album.id,
+                    title: album.title,
+                    description: album.description || "Community moments coming soon.",
+                    image: photo?.image_url,
+                    alt: photo?.alt_text ?? album.title,
+                  };
+                }),
+                ...localLatestMoments,
+              ]
             : localLatestMoments
           ).map((moment) => (
             <motion.div
@@ -438,32 +443,25 @@ function Index() {
           </div>
           <Users className="hidden h-12 w-12 text-primary/30 md:block" />
         </div>
-        <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {committee.length ? (
-            committee.map((member) => (
-              <Card key={member.id} className="overflow-hidden">
-                {member.image_url ? (
-                  <img
-                    src={member.image_url}
-                    alt={member.name}
-                    className="aspect-square w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex aspect-square items-center justify-center bg-primary/10 text-5xl font-bold text-primary">
-                    {member.name.charAt(0)}
-                  </div>
-                )}
-                <CardContent className="p-3 sm:p-5">
-                  <h3 className="text-base sm:text-xl">{member.name}</h3>
-                  <p className="mt-1 text-xs sm:text-sm text-muted-foreground">{member.role}</p>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-full rounded-lg border border-dashed p-10 text-center text-muted-foreground">
-              Committee profiles will be announced soon.
+        <div className="mt-10">
+          <CoreMembers members={committee} />
+        </div>
+      </section>
+
+      <section className="bg-muted">
+        <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary">
+                Our community
+              </p>
+              <h2 className="mt-3 text-4xl md:text-6xl">BSA members</h2>
             </div>
-          )}
+            <Users className="hidden h-12 w-12 text-primary/30 md:block" />
+          </div>
+          <div className="mt-10">
+            <MembersGrid limit={24} marquee />
+          </div>
         </div>
       </section>
 

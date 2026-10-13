@@ -149,8 +149,28 @@ The browser client uses only the public anon/publishable key. Do not put a servi
 allows public contact submissions, and reserves content management and contact-message reads for
 profiles explicitly assigned the `admin` role.
 
-This adds the database and authorization foundation, not an admin login or content-management
-screen. Those UI flows can be added separately; contact form submissions are stored in
-`contact_messages`, and image objects use the public `bsa-gallery` Storage bucket. Public contact
-submission is not yet protected by CAPTCHA or rate limiting, so add an abuse-control mechanism
-before exposing the form to heavy traffic.
+Member applications use the `members` table and the public `bsa-gallery/members` storage path.
+Apply the member migrations after the initial schema:
+
+```bash
+supabase db push
+```
+
+To test the directory locally, run `supabase/seed_members_demo.sql` once in the SQL Editor. It
+adds 24 approved demo members and can be removed later with a query scoped to `DEMO-` student IDs.
+
+Approval and decline messages use the `member-status-email` Supabase Edge Function with Resend.
+Deploy it and configure its server-side secrets; never expose these values as `VITE_` variables:
+
+```bash
+supabase functions deploy member-status-email
+supabase secrets set RESEND_API_KEY=re_xxx BSA_FROM_EMAIL="BSA APU <membership@your-verified-domain>" PUBLIC_SITE_URL=https://your-site.example
+```
+
+`SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` are supplied by Supabase.
+The `BSA_FROM_EMAIL` domain must be verified in Resend. The function checks the caller is an admin,
+then sends the welcome or decline email after the dashboard changes the member status. Decline
+messages always include “Please apply again.” and the `/join` link.
+
+Public contact submission is not yet protected by CAPTCHA or rate limiting, so add an abuse-control
+mechanism before exposing the form to heavy traffic.

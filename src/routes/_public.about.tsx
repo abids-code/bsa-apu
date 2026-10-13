@@ -1,9 +1,22 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Heart, Users, Globe2, HandHelping } from "lucide-react";
-import { MemberSupportSection } from "@/components/public/MemberSupport";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, Globe2, Heart, HandHelping, Users } from "lucide-react";
+
+import { CoreMembers } from "@/components/public/CoreMembers";
+import { MembersGrid } from "@/components/public/MembersGrid";
 import { PageHeader } from "@/components/public/SiteChrome";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/_public/about")({
+  loader: async () => {
+    if (!supabase) return { committee: [] };
+    const { data, error } = await supabase
+      .from("committee_members")
+      .select("id, name, role, instagram_handle, linkedin_url, image_url")
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return { committee: data };
+  },
   head: () => ({
     meta: [
       { title: "About — BSA APU" },
@@ -12,8 +25,6 @@ export const Route = createFileRoute("/_public/about")({
         content:
           "Our mission, values and committee at the Bangladeshi Students Association, Ritsumeikan APU.",
       },
-      { property: "og:title", content: "About the Bangladeshi Students Association at APU" },
-      { property: "og:description", content: "Mission, values and the people behind BSA APU." },
     ],
   }),
   component: About,
@@ -38,16 +49,9 @@ const values = [
   { icon: Globe2, t: "Exchange", d: "Share Bangladesh with APU's 90+ nationalities." },
 ];
 
-const team: [string, string][] = [
-  ["President", "To be announced"],
-  ["Vice President", "To be announced"],
-  ["General Secretary", "To be announced"],
-  ["Treasurer", "To be announced"],
-  ["Cultural Secretary", "To be announced"],
-  ["PR & Media", "To be announced"],
-];
-
 function About() {
+  const { committee } = Route.useLoaderData();
+
   return (
     <>
       <PageHeader
@@ -67,24 +71,40 @@ function About() {
           ))}
         </div>
       </section>
-      <MemberSupportSection />
 
       <section className="bg-muted">
         <div className="mx-auto max-w-6xl px-5 py-20">
-          <h2 className="slash text-5xl">Executive committee</h2>
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {team.map(([role, name]) => (
-              <div key={role} className="flex items-center gap-4 bg-card p-5">
-                <div className="flex h-14 w-14 items-center justify-center bg-primary font-display text-2xl text-primary-foreground">
-                  {role[0]}
-                </div>
-                <div>
-                  <p className="font-semibold">{name}</p>
-                  <p className="text-sm text-muted-foreground">{role}</p>
-                </div>
-              </div>
-            ))}
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary">
+                People behind BSA
+              </p>
+              <h2 className="mt-3 text-5xl">Core committee</h2>
+            </div>
+            <Users className="hidden h-12 w-12 text-primary/30 md:block" />
           </div>
+          <div className="mt-12">
+            <CoreMembers members={committee} />
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 py-20">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="slash text-5xl">Our members</h2>
+            <p className="mt-4 max-w-2xl text-muted-foreground">
+              Browse a compact, seniority-sorted directory of approved BSA members.
+            </p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/about/members">
+              View all members <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+        <div className="mt-12">
+          <MembersGrid limit={12} />
         </div>
       </section>
     </>

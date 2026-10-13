@@ -19,8 +19,10 @@ import { Route as PublicBflRouteImport } from './routes/_public.bfl'
 import { Route as PublicContactRouteImport } from './routes/_public.contact'
 import { Route as PublicEventsRouteImport } from './routes/_public.events'
 import { Route as PublicGalleryRouteImport } from './routes/_public.gallery'
+import { Route as PublicJoinRouteImport } from './routes/_public.join'
 import { Route as PublicNewsRouteImport } from './routes/_public.news'
 import { Route as AdminAdminCommitteeRouteImport } from './routes/_admin.admin.committee'
+import { Route as PublicAboutMembersRouteImport } from './routes/_public.about.members'
 
 const AdminRoute = AdminRouteImport.update({
   id: '/_admin',
@@ -70,6 +72,11 @@ const PublicGalleryRoute = PublicGalleryRouteImport.update({
   path: '/gallery',
   getParentRoute: () => PublicRoute,
 } as any)
+const PublicJoinRoute = PublicJoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => PublicRoute,
+} as any)
 const PublicNewsRoute = PublicNewsRouteImport.update({
   id: '/news',
   path: '/news',
@@ -80,45 +87,56 @@ const AdminAdminCommitteeRoute = AdminAdminCommitteeRouteImport.update({
   path: '/committee',
   getParentRoute: () => AdminAdminRoute,
 } as any)
+const PublicAboutMembersRoute = PublicAboutMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => PublicAboutRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/admin': typeof AdminAdminRouteWithChildren
-  '/about': typeof PublicAboutRoute
+  '/about': typeof PublicAboutRouteWithChildren
   '/bdweek': typeof PublicBdweekRoute
   '/bfl': typeof PublicBflRoute
   '/contact': typeof PublicContactRoute
   '/events': typeof PublicEventsRoute
   '/gallery': typeof PublicGalleryRoute
+  '/join': typeof PublicJoinRoute
   '/news': typeof PublicNewsRoute
   '/admin/committee': typeof AdminAdminCommitteeRoute
+  '/about/members': typeof PublicAboutMembersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/admin': typeof AdminAdminRouteWithChildren
-  '/about': typeof PublicAboutRoute
+  '/about': typeof PublicAboutRouteWithChildren
   '/bdweek': typeof PublicBdweekRoute
   '/bfl': typeof PublicBflRoute
   '/contact': typeof PublicContactRoute
   '/events': typeof PublicEventsRoute
   '/gallery': typeof PublicGalleryRoute
+  '/join': typeof PublicJoinRoute
   '/news': typeof PublicNewsRoute
   '/admin/committee': typeof AdminAdminCommitteeRoute
+  '/about/members': typeof PublicAboutMembersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_admin': typeof AdminRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/_admin/admin': typeof AdminAdminRouteWithChildren
-  '/_public/about': typeof PublicAboutRoute
+  '/_public/about': typeof PublicAboutRouteWithChildren
   '/_public/bdweek': typeof PublicBdweekRoute
   '/_public/bfl': typeof PublicBflRoute
   '/_public/contact': typeof PublicContactRoute
   '/_public/events': typeof PublicEventsRoute
   '/_public/gallery': typeof PublicGalleryRoute
+  '/_public/join': typeof PublicJoinRoute
   '/_public/news': typeof PublicNewsRoute
   '/_public/': typeof PublicIndexRoute
   '/_admin/admin/committee': typeof AdminAdminCommitteeRoute
+  '/_public/about/members': typeof PublicAboutMembersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,8 +149,10 @@ export interface FileRouteTypes {
     | '/contact'
     | '/events'
     | '/gallery'
+    | '/join'
     | '/news'
     | '/admin/committee'
+    | '/about/members'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -143,8 +163,10 @@ export interface FileRouteTypes {
     | '/contact'
     | '/events'
     | '/gallery'
+    | '/join'
     | '/news'
     | '/admin/committee'
+    | '/about/members'
   id:
     | '__root__'
     | '/_admin'
@@ -156,9 +178,11 @@ export interface FileRouteTypes {
     | '/_public/contact'
     | '/_public/events'
     | '/_public/gallery'
+    | '/_public/join'
     | '/_public/news'
     | '/_public/'
     | '/_admin/admin/committee'
+    | '/_public/about/members'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -238,6 +262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicGalleryRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_public/join': {
+      id: '/_public/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof PublicJoinRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_public/news': {
       id: '/_public/news'
       path: '/news'
@@ -251,6 +282,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/committee'
       preLoaderRoute: typeof AdminAdminCommitteeRouteImport
       parentRoute: typeof AdminAdminRoute
+    }
+    '/_public/about/members': {
+      id: '/_public/about/members'
+      path: '/members'
+      fullPath: '/about/members'
+      preLoaderRoute: typeof PublicAboutMembersRouteImport
+      parentRoute: typeof PublicAboutRoute
     }
   }
 }
@@ -277,24 +315,38 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface PublicAboutRouteChildren {
+  PublicAboutMembersRoute: typeof PublicAboutMembersRoute
+}
+
+const PublicAboutRouteChildren: PublicAboutRouteChildren = {
+  PublicAboutMembersRoute: PublicAboutMembersRoute,
+}
+
+const PublicAboutRouteWithChildren = PublicAboutRoute._addFileChildren(
+  PublicAboutRouteChildren,
+)
+
 interface PublicRouteChildren {
-  PublicAboutRoute: typeof PublicAboutRoute
+  PublicAboutRoute: typeof PublicAboutRouteWithChildren
   PublicBdweekRoute: typeof PublicBdweekRoute
   PublicBflRoute: typeof PublicBflRoute
   PublicContactRoute: typeof PublicContactRoute
   PublicEventsRoute: typeof PublicEventsRoute
   PublicGalleryRoute: typeof PublicGalleryRoute
+  PublicJoinRoute: typeof PublicJoinRoute
   PublicNewsRoute: typeof PublicNewsRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
-  PublicAboutRoute: PublicAboutRoute,
+  PublicAboutRoute: PublicAboutRouteWithChildren,
   PublicBdweekRoute: PublicBdweekRoute,
   PublicBflRoute: PublicBflRoute,
   PublicContactRoute: PublicContactRoute,
   PublicEventsRoute: PublicEventsRoute,
   PublicGalleryRoute: PublicGalleryRoute,
+  PublicJoinRoute: PublicJoinRoute,
   PublicNewsRoute: PublicNewsRoute,
   PublicIndexRoute: PublicIndexRoute,
 }

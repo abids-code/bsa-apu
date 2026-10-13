@@ -76,7 +76,27 @@ type CommitteeMemberRow = {
   name: string;
   role: string;
   instagram_handle: string | null;
+  linkedin_url: string | null;
   image_url: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type MemberRow = {
+  id: string;
+  name: string;
+  email: string;
+  semester: string;
+  student_id: string;
+  nationality: string;
+  degree_level: "Bachelor" | "Masters" | "Alumni";
+  department: "APM" | "APS" | "ST" | "MBA";
+  instagram_url: string | null;
+  facebook_url: string | null;
+  linkedin_url: string | null;
+  image_url: string | null;
+  approval_status: "pending" | "approved" | "declined";
+  decline_reason: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -118,6 +138,12 @@ type Database = {
         CommitteeMemberRow,
         Omit<CommitteeMemberRow, "id" | "created_at" | "updated_at"> &
           Partial<Pick<CommitteeMemberRow, "id">>
+      >;
+      members: Table<
+        MemberRow,
+        Omit<MemberRow, "id" | "created_at" | "updated_at" | "approval_status" | "decline_reason"> &
+          Partial<Pick<MemberRow, "id" | "approval_status">>,
+        Partial<Omit<MemberRow, "id" | "created_at" | "updated_at">>
       >;
     };
     Views: Record<string, never>;
