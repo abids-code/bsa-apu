@@ -461,6 +461,13 @@ function Index() {
           </div>
           <div className="mt-10">
             <MembersGrid limit={24} marquee />
+            <div className="mt-8 flex justify-center">
+              <Button asChild size="lg" variant="outline">
+                <Link to="/about/members">
+                  View all members <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>

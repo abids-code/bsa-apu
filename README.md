@@ -174,3 +174,28 @@ messages always include “Please apply again.” and the `/join` link.
 
 Public contact submission is not yet protected by CAPTCHA or rate limiting, so add an abuse-control
 mechanism before exposing the form to heavy traffic.
+
+## Cloudinary image uploads
+
+All new user/admin image uploads now use Cloudinary with client-side compression:
+
+- Member profile pictures: `bsa-apu/members`
+- Gallery photos: `bsa-apu/gallery`
+- Event images: `bsa-apu/events`
+- News images: `bsa-apu/news`
+
+Set these public Vite variables in `.env.local` and your hosting provider:
+
+```env
+VITE_CLOUDINARY_CLOUD_NAME=h0ie7lrb
+VITE_CLOUDINARY_UPLOAD_PRESET=bsa-uploads
+```
+
+The upload preset must be an **unsigned image upload preset**. Cloudinary cloud names and
+unsigned preset names are safe to expose in browser code; do not put an API secret in any
+`VITE_` variable.
+
+Existing Supabase image URLs remain usable and are not deleted automatically. Existing database
+images should be migrated through Cloudinary's Media Library or a controlled server-side
+migration using Cloudinary's authenticated API; the browser cannot safely perform a bulk migration
+without a Supabase service-role credential.

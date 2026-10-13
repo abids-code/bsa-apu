@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/lib/supabase";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
 
 type AdminNewsItem = {
   id: string;
@@ -108,22 +109,17 @@ export function AdminNews() {
     const formData = new FormData(event.currentTarget);
     const headerImage = formData.get("header_image");
     let imageUrl = formValues.image_url;
-    let uploadedPath: string | null = null;
     setSubmitting(true);
     setErrorMessage(null);
 
     if (headerImage instanceof File && headerImage.size > 0) {
-      const fileName = headerImage.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-      uploadedPath = `news/${crypto.randomUUID()}-${fileName}`;
-      const { error: uploadError } = await supabase.storage
-        .from("bsa-gallery")
-        .upload(uploadedPath, headerImage, { contentType: headerImage.type, upsert: false });
-      if (uploadError) {
-        setErrorMessage(uploadError.message);
+      try {
+        imageUrl = await uploadImageToCloudinary(headerImage, "news");
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Could not upload news image.");
         setSubmitting(false);
         return;
       }
-      imageUrl = supabase.storage.from("bsa-gallery").getPublicUrl(uploadedPath).data.publicUrl;
     }
 
     const values = {
@@ -139,7 +135,6 @@ export function AdminNews() {
       : await supabase.from("news").insert(values);
 
     if (result.error) {
-      if (uploadedPath) await supabase.storage.from("bsa-gallery").remove([uploadedPath]);
       setErrorMessage(result.error.message);
       setSubmitting(false);
       return;

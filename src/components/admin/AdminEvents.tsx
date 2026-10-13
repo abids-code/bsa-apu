@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/lib/supabase";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
 
 type AdminEvent = {
   id: string;
@@ -132,21 +133,15 @@ export function AdminEvents() {
 
     const flyer = formData.get("flyer");
     let imageUrl = formValues.image_url;
-    let uploadedPath: string | null = null;
 
     if (flyer instanceof File && flyer.size > 0) {
-      const fileName = flyer.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-      uploadedPath = `events/${crypto.randomUUID()}-${fileName}`;
-      const { error: uploadError } = await supabase.storage
-        .from("bsa-gallery")
-        .upload(uploadedPath, flyer, { contentType: flyer.type, upsert: false });
-
-      if (uploadError) {
-        setErrorMessage(uploadError.message);
+      try {
+        imageUrl = await uploadImageToCloudinary(flyer, "events");
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : "Could not upload event image.");
         setSubmitting(false);
         return;
       }
-      imageUrl = supabase.storage.from("bsa-gallery").getPublicUrl(uploadedPath).data.publicUrl;
     }
 
     const values = {
@@ -165,7 +160,6 @@ export function AdminEvents() {
       : await supabase.from("events").insert(values);
 
     if (result.error) {
-      if (uploadedPath) await supabase.storage.from("bsa-gallery").remove([uploadedPath]);
       setErrorMessage(result.error.message);
       setSubmitting(false);
       return;

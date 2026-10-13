@@ -1,10 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Globe2, Heart, HandHelping, Users } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Globe2, Heart, HandHelping, Users } from "lucide-react";
 
 import { CoreMembers } from "@/components/public/CoreMembers";
 import { MembersGrid } from "@/components/public/MembersGrid";
 import { PageHeader } from "@/components/public/SiteChrome";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/_public/about")({
@@ -90,18 +89,11 @@ function About() {
       </section>
 
       <section className="mx-auto max-w-6xl px-5 py-20">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h2 className="slash text-5xl">Our members</h2>
-            <p className="mt-4 max-w-2xl text-muted-foreground">
-              Browse a compact, seniority-sorted directory of approved BSA members.
-            </p>
-          </div>
-          <Button asChild variant="outline">
-            <Link to="/about/members">
-              View all members <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
+        <div>
+          <h2 className="slash text-5xl">Our members</h2>
+          <p className="mt-4 max-w-2xl text-muted-foreground">
+            Browse a compact, seniority-sorted directory of approved BSA members.
+          </p>
         </div>
         <div className="mt-12">
           <MembersGrid limit={12} />
