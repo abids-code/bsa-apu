@@ -1,4 +1,4 @@
-import { Instagram, Linkedin } from "lucide-react";
+import { Instagram } from "lucide-react";
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
@@ -7,7 +7,6 @@ type CoreMember = {
   name: string;
   role: string;
   instagram_handle: string | null;
-  linkedin_url?: string | null;
   image_url: string | null;
 };
 
@@ -48,11 +47,6 @@ export function CoreMembers({ members }: { members: CoreMember[] }) {
                   label="Instagram"
                 >
                   <Instagram />
-                </SocialIcon>
-              ) : null}
-              {member.linkedin_url ? (
-                <SocialIcon href={member.linkedin_url} label="LinkedIn">
-                  <Linkedin />
                 </SocialIcon>
               ) : null}
             </div>

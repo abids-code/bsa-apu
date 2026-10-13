@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useAnimation } from "framer-motion";
-import { Facebook, Instagram, Linkedin, Mail, UserRound } from "lucide-react";
+import { Facebook, Instagram, Mail, UserRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +23,6 @@ export type PublicMember = {
   department: string;
   instagram_url: string | null;
   facebook_url: string | null;
-  linkedin_url: string | null;
   image_url: string | null;
 };
 
@@ -58,7 +57,7 @@ export function MembersGrid({
       const { data, error } = await supabase
         .from("members")
         .select(
-          "id, name, email, semester, student_id, nationality, degree_level, department, instagram_url, facebook_url, linkedin_url, image_url",
+          "id, name, email, semester, student_id, nationality, degree_level, department, instagram_url, facebook_url, image_url",
         )
         .eq("approval_status", "approved");
       if (error) setErrorMessage(error.message);
@@ -307,9 +306,6 @@ function MemberProfileDialog({
               </SocialLink>
               <SocialLink href={member.facebook_url} label="Facebook">
                 <Facebook />
-              </SocialLink>
-              <SocialLink href={member.linkedin_url} label="LinkedIn">
-                <Linkedin />
               </SocialLink>
             </div>
           </>

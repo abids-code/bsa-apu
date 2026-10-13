@@ -64,7 +64,7 @@ export const Route = createFileRoute("/_public/")({
         .limit(6),
       supabase
         .from("committee_members")
-        .select("id, name, role, instagram_handle, linkedin_url, image_url")
+        .select("id, name, role, instagram_handle, image_url")
         .order("created_at", { ascending: true }),
     ]);
 

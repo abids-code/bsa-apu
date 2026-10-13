@@ -76,7 +76,6 @@ type CommitteeMemberRow = {
   name: string;
   role: string;
   instagram_handle: string | null;
-  linkedin_url: string | null;
   image_url: string | null;
   created_at: string;
   updated_at: string;
@@ -93,7 +92,6 @@ type MemberRow = {
   department: "APM" | "APS" | "ST" | "MBA";
   instagram_url: string | null;
   facebook_url: string | null;
-  linkedin_url: string | null;
   image_url: string | null;
   approval_status: "pending" | "approved" | "declined";
   decline_reason: string | null;

@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_public/about")({
     if (!supabase) return { committee: [] };
     const { data, error } = await supabase
       .from("committee_members")
-      .select("id, name, role, instagram_handle, linkedin_url, image_url")
+      .select("id, name, role, instagram_handle, image_url")
       .order("created_at", { ascending: true });
     if (error) throw error;
     return { committee: data };

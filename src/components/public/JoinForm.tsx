@@ -62,7 +62,6 @@ export function JoinForm() {
         department,
         instagram_url: String(formData.get("instagram_url") ?? "").trim() || null,
         facebook_url: String(formData.get("facebook_url") ?? "").trim() || null,
-        linkedin_url: String(formData.get("linkedin_url") ?? "").trim() || null,
         image_url: imageUrl,
         approval_status: "pending",
       });
@@ -156,12 +155,6 @@ export function JoinForm() {
           name="facebook_url"
           type="url"
           placeholder="https://facebook.com/..."
-        />
-        <Field
-          label="LinkedIn URL"
-          name="linkedin_url"
-          type="url"
-          placeholder="https://linkedin.com/in/..."
         />
       </div>
       {errorMessage && (

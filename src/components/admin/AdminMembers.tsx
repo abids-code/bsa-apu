@@ -33,7 +33,6 @@ type MemberApplication = {
   department: string;
   instagram_url: string | null;
   facebook_url: string | null;
-  linkedin_url: string | null;
   image_url: string | null;
   approval_status: "pending" | "approved" | "declined";
   decline_reason: string | null;
@@ -41,7 +40,7 @@ type MemberApplication = {
 };
 
 const fields =
-  "id, name, email, semester, student_id, nationality, degree_level, department, instagram_url, facebook_url, linkedin_url, image_url, approval_status, decline_reason, created_at";
+  "id, name, email, semester, student_id, nationality, degree_level, department, instagram_url, facebook_url, image_url, approval_status, decline_reason, created_at";
 const declineTemplates = [
   "Profile picture is not appropriate",
   "Wrong semester input",
@@ -279,7 +278,6 @@ export function AdminMembers() {
                   />
                   <Detail label="Instagram" value={selected.instagram_url ?? "Not provided"} />
                   <Detail label="Facebook" value={selected.facebook_url ?? "Not provided"} />
-                  <Detail label="LinkedIn" value={selected.linkedin_url ?? "Not provided"} />
                 </div>
               </div>
               <DialogFooter>
